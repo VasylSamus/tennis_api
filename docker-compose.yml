@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: tennis-api
+    image: tennis-api
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    env_file:
+      - .env
+    entrypoint: /entrypoint.sh
+    volumes:
+#      - ./app:/usr/src/app/
+      - tennis_data:/usr/src/app/storage
+    ports:
+      - "8888:8000"
+    networks:
+      - tennis_network
+    depends_on:
+      - db
+    restart:
+      unless-stopped
+
+  db:
+    container_name: tennis-db
+    image: postgres:13-alpine3.14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    networks:
+      - tennis_network
+    ports:
+      - "5439:5432"
+    restart:
+      unless-stopped
+
+volumes:
+  postgres_data:
+  tennis_data:
+
+networks:
+  tennis_network:
+    driver: bridge
